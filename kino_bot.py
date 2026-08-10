@@ -390,7 +390,7 @@ def search_movie(message):
         bot.send_message(message.chat.id, "❌ Bunday kod bilan kino topilmadi.")
     bot.delete_state(message.from_user.id, message.chat.id)
 
-@bot.message_handler(func=lambda message: True, state=None)
+@bot.message_handler(func=lambda message: message.text and not message.text.startswith('/'), state=None)
 def text_handler(message):
     text = message.text
     user_id = message.from_user.id
