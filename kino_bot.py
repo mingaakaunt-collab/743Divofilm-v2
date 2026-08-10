@@ -53,6 +53,10 @@ def get_main_menu():
     ]
     return json.dumps({"keyboard": keyboard, "resize_keyboard": True})
 
+def get_cancel_keyboard():
+    keyboard = [[colorful_reply_button("❌ Bekor qilish", "danger")]]
+    return json.dumps({"keyboard": keyboard, "resize_keyboard": True})
+
 def get_admin_keyboard():
     keyboard = [
         [colorful_reply_button("📢 Majburiy obuna", "danger")],
@@ -367,6 +371,11 @@ def search_movie(message):
         return
 
     code = message.text
+    if code == "❌ Bekor qilish":
+        bot.send_message(message.chat.id, "Kino qidirish bekor qilindi.", reply_markup=get_main_menu())
+        bot.delete_state(message.from_user.id, message.chat.id)
+        return
+
     movie = database.get_movie(code)
     if movie:
         caption = f"🎬 Nomi: <b>{movie['name']}</b>\n🇺🇿 Tili: <b>{movie['lang']}</b>\n🎞 Sifati: <b>{movie['quality']}</b>"
@@ -396,7 +405,7 @@ def text_handler(message):
             return
             
     if text == "🔍 Kino Qidirish":
-        bot.send_message(message.chat.id, "✍️ Iltimos, topmoqchi bo'lgan kino kodini yozing:")
+        bot.send_message(message.chat.id, "✍️ Iltimos, topmoqchi bo'lgan kino kodini yozing:", reply_markup=get_cancel_keyboard())
         bot.set_state(message.from_user.id, SearchState.code, message.chat.id)
     elif text == "💾 Saqlanganlar":
         saved = database.get_saved_movies(user_id)
