@@ -490,8 +490,11 @@ if __name__ == '__main__':
     print(f"Health check server {port}-portda ishga tushdi.")
 
     print("Kino bot ishga tushdi...")
-    try:
-        bot.remove_webhook()
-        bot.infinity_polling(skip_pending=True, allowed_updates=['message', 'callback_query', 'channel_post', 'chat_join_request'])
-    except Exception as e:
-        print(f"Xatolik yuz berdi: {e}")
+    import time
+    while True:
+        try:
+            bot.remove_webhook()
+            bot.infinity_polling(skip_pending=True, allowed_updates=['message', 'callback_query', 'channel_post', 'chat_join_request'])
+        except Exception as e:
+            print(f"Xatolik yuz berdi: {e}")
+            time.sleep(15)  # wait before retrying
