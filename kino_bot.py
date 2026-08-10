@@ -338,29 +338,44 @@ def handle_channel_post(message):
 
 @bot.message_handler(state=MovieState.code)
 def get_code(message):
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data: data['code'] = message.text
-    bot.send_message(message.chat.id, "Kino nomini yozing:")
-    bot.set_state(message.from_user.id, MovieState.name, message.chat.id)
+    try:
+        with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+            data['code'] = message.text
+        bot.send_message(message.chat.id, "Kino nomini yozing:")
+        bot.set_state(message.from_user.id, MovieState.name, message.chat.id)
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Xatolik: {e}")
 
 @bot.message_handler(state=MovieState.name)
 def get_name(message):
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data: data['name'] = message.text
-    bot.send_message(message.chat.id, "Kino tilini yozing (masalan: O'zbekcha):")
-    bot.set_state(message.from_user.id, MovieState.lang, message.chat.id)
+    try:
+        with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+            data['name'] = message.text
+        bot.send_message(message.chat.id, "Kino tilini yozing (masalan: O'zbekcha):")
+        bot.set_state(message.from_user.id, MovieState.lang, message.chat.id)
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Xatolik: {e}")
 
 @bot.message_handler(state=MovieState.lang)
 def get_lang(message):
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data: data['lang'] = message.text
-    bot.send_message(message.chat.id, "Kino sifatini yozing (masalan: 1080p, 720p):")
-    bot.set_state(message.from_user.id, MovieState.quality, message.chat.id)
+    try:
+        with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+            data['lang'] = message.text
+        bot.send_message(message.chat.id, "Kino sifatini yozing (masalan: 1080p, 720p):")
+        bot.set_state(message.from_user.id, MovieState.quality, message.chat.id)
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Xatolik: {e}")
 
 @bot.message_handler(state=MovieState.quality)
 def get_quality(message):
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        code, file_id, name, lang, quality = data['code'], data['file_id'], data['name'], data['lang'], message.text
-        database.add_movie(code, file_id, name, lang, quality, data.get('message_id'), data.get('channel_id'))
-    bot.send_message(message.chat.id, f"✅ <b>Kino bazaga saqlandi!</b>\n\n📌 <b>Kod:</b> {code}\n🎬 <b>Nom:</b> {name}\n🇺🇿 <b>Til:</b> {lang}\n🎞 <b>Sifat:</b> {quality}", parse_mode="HTML")
-    bot.delete_state(message.from_user.id, message.chat.id)
+    try:
+        with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+            code, file_id, name, lang, quality = data['code'], data['file_id'], data['name'], data['lang'], message.text
+            database.add_movie(code, file_id, name, lang, quality, data.get('message_id'), data.get('channel_id'))
+        bot.send_message(message.chat.id, f"✅ <b>Kino bazaga saqlandi!</b>\n\n📌 <b>Kod:</b> {code}\n🎬 <b>Nom:</b> {name}\n🇺🇿 <b>Til:</b> {lang}\n🎞 <b>Sifat:</b> {quality}", parse_mode="HTML")
+        bot.delete_state(message.from_user.id, message.chat.id)
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Xatolik: {e}")
 
 @bot.message_handler(state=SearchState.code)
 def search_movie(message):
@@ -387,7 +402,7 @@ def search_movie(message):
         except Exception:
             bot.send_message(message.chat.id, "Kino yuborishda xatolik: Video yaroqsiz.")
     else:
-        bot.send_message(message.chat.id, "❌ Bunday kod bilan kino topilmadi.")
+        bot.send_message(message.chat.id, "Kechirasiz bunday kodlik kino yo'q.")
     bot.delete_state(message.from_user.id, message.chat.id)
 
 @bot.message_handler(func=lambda message: message.text and not message.text.startswith('/'), state=None)
