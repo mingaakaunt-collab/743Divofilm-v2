@@ -9,14 +9,14 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 database.init_db()
 
-TOKEN = os.environ.get("BOT_TOKEN", "8879689840:AAHHvv61T0KmC6QE5k05d30lUPUCe8lY0Vs")
+TOKEN = os.environ.get("BOT_TOKEN", "8635674101:AAFcIt4w98eqGt5cNAHXKaGjHFVLRXmww_4")
 state_storage = StateMemoryStorage()
 bot = telebot.TeleBot(TOKEN, state_storage=state_storage)
 # Retrieve bot username once for link generation (will be set lazily)
 BOT_USERNAME = None
 
 
-ADMIN_IDS = list(map(int, os.environ.get("ADMIN_IDS", "6316926082").split(",")))
+ADMIN_IDS = list(map(int, os.environ.get("ADMIN_IDS", "5866652107").split(",")))
 
 class MovieState(StatesGroup):
     code = State()
