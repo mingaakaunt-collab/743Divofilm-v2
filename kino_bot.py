@@ -367,10 +367,10 @@ def search_movie(message):
     user_id = message.from_user.id
     code = message.text
 
-    # Bekor qilish – obuna tekshiruvidan oldin
+    # Bekor qilish – birinchi tekshiriladi
     if code == "❌ Bekor qilish":
-        bot.send_message(message.chat.id, "Kino qidirish bekor qilindi.", reply_markup=get_main_menu())
         bot.delete_state(message.from_user.id, message.chat.id)
+        bot.send_message(message.chat.id, "Kino qidirish bekor qilindi.", reply_markup=get_main_menu())
         return
 
     not_subscribed = check_subscription(user_id)
@@ -395,7 +395,13 @@ def text_handler(message):
     text = message.text
     user_id = message.from_user.id
     database.add_user(user_id)
-    
+
+    # Bekor qilish – har qanday holatda ham ishlaydi
+    if text == "❌ Bekor qilish":
+        bot.send_message(message.chat.id, "Bekor qilindi.", reply_markup=get_main_menu())
+        bot.delete_state(user_id, message.chat.id)
+        return
+
     if text == "📢 Majburiy obuna" and user_id in ADMIN_IDS:
         bot.send_message(message.chat.id, "Majburiy obuna sozlamalari:", reply_markup=get_admin_channels_menu())
         return
