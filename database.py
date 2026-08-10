@@ -141,6 +141,21 @@ def get_movie_count():
     conn.close()
     return count
 
+def get_all_movies():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT code, name, lang, quality FROM movies ORDER BY rowid DESC')
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"code": r[0], "name": r[1], "lang": r[2], "quality": r[3]} for r in rows]
+
+def delete_movie(code):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM movies WHERE code = ?', (code,))
+    conn.commit()
+    conn.close()
+
 def add_join_request(user_id, chat_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
