@@ -430,8 +430,9 @@ def text_handler(message):
                 except:
                     bot.send_message(message.chat.id, caption, parse_mode="HTML", reply_markup=markup)
     elif text == "ℹ️ Yordam":
-        # "Salom, @Dinofilmuzbot boyicha murojat qilyabman ❗️" URL encoded
-        url = "https://t.me/dinofuzadmin?text=Salom%2C%20%40Dinofilmuzbot%20boyicha%20murojat%20qilyabman%20%E2%9D%97%EF%B8%8F"
+        # "Salom, @Dinofilmuzbot boyicha murojat qilyabman ❗" URL encoded
+        # ❗ = U+2757 = %E2%9D%97
+        url = "https://t.me/dinofuzadmin?text=Salom%2C%20%40Dinofilmuzbot%20boyicha%20murojat%20qilyabman%20%E2%9D%97"
         markup = json.dumps({"inline_keyboard": [[{"text": "👨‍💻 Adminga yozish", "url": url, "style": "primary"}]]})
         bot.send_message(message.chat.id, "Admin bilan bog'lanish uchun quyidagi tugmani bosing:", reply_markup=markup)
     elif text == "🏠 Asosiy menyu":
