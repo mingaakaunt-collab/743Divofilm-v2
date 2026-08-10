@@ -155,7 +155,7 @@ def send_subscription_warning(chat_id, not_subscribed):
     bot.send_message(chat_id, text, parse_mode="HTML", reply_markup=markup)
 
 # Zayavkalarni ushlab qolish (qabul qilmaydi, shunchaki ro'yxatga oladi)
-@bot.chat_join_request_handler
+@bot.chat_join_request_handler(func=lambda request: True)
 def handle_join_request(request):
     print(f"Zayavka tushdi: User {request.from_user.id} -> Chat {request.chat.id}")
     database.add_join_request(request.from_user.id, request.chat.id)
@@ -230,7 +230,7 @@ def check_sub_callback(call):
     not_subscribed = check_subscription(call.from_user.id)
     if not not_subscribed:
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        bot.answer_callback_query(call.id, "Botdan toliq foydalanishingiz mumkun", show_alert=True)
+        bot.answer_callback_query(call.id, "Tabriklaymiz endi botdan toliq foydalanishingiz mumkin", show_alert=True)
     else:
         bot.answer_callback_query(call.id, "Kechirasiz kanallarga toliq obuna bolmagansz", show_alert=True)
 
