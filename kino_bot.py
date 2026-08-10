@@ -61,7 +61,8 @@ def get_admin_keyboard():
     keyboard = [
         [colorful_reply_button("📢 Majburiy obuna", "danger")],
         [colorful_reply_button("📊 Statistika", "primary"), colorful_reply_button("✉️ Rassilka", "success")],
-        [colorful_reply_button("🎬 Yangi kino", "danger"), colorful_reply_button("🏠 Asosiy menyu", "default")]
+        [colorful_reply_button("🎬 Yangi kino", "danger"), colorful_reply_button("🎬 Kinolar ro'yxati", "primary")],
+        [colorful_reply_button("🏠 Asosiy menyu", "default")]
     ]
     return json.dumps({"keyboard": keyboard, "resize_keyboard": True})
 
@@ -364,16 +365,18 @@ def get_quality(message):
 @bot.message_handler(state=SearchState.code)
 def search_movie(message):
     user_id = message.from_user.id
+    code = message.text
+
+    # Bekor qilish – obuna tekshiruvidan oldin
+    if code == "❌ Bekor qilish":
+        bot.send_message(message.chat.id, "Kino qidirish bekor qilindi.", reply_markup=get_main_menu())
+        bot.delete_state(message.from_user.id, message.chat.id)
+        return
+
     not_subscribed = check_subscription(user_id)
     if not_subscribed:
         send_subscription_warning(message.chat.id, not_subscribed)
         bot.delete_state(user_id, message.chat.id)
-        return
-
-    code = message.text
-    if code == "❌ Bekor qilish":
-        bot.send_message(message.chat.id, "Kino qidirish bekor qilindi.", reply_markup=get_main_menu())
-        bot.delete_state(message.from_user.id, message.chat.id)
         return
 
     movie = database.get_movie(code)
@@ -448,15 +451,19 @@ def text_handler(message):
         bot.send_message(message.chat.id, "Rassilka funksiyasi tayyorlanmoqda.")
     elif text == "🎬 Yangi kino" and user_id in ADMIN_IDS:
         bot.send_message(message.chat.id, "Buning uchun bot ulanadigan kanalga yangi video yuboring, bot o'zi sizdan ma'lumotlarni so'raydi!")
-    else:
-        if not text.startswith('/'):
-            movie = database.get_movie(text)
-            if movie:
-                caption = f"🎬 Nomi: <b>{movie['name']}</b>\n🇺🇿 Tili: <b>{movie['lang']}</b>\n🎞 Sifati: <b>{movie['quality']}</b>"
-                try: bot.send_video(message.chat.id, movie['file_id'], caption=caption, parse_mode="HTML", reply_markup=get_movie_keyboard(text), protect_content=True)
-                except: bot.send_message(message.chat.id, "❌ Kino topilmadi yoki o'chirilgan.")
-            else:
-                bot.send_message(message.chat.id, "❌ Bunday kod bilan kino topilmadi.")
+    elif text == "🎬 Kinolar ro'yxati" and user_id in ADMIN_IDS:
+        movies = database.get_all_movies()
+        if not movies:
+            bot.send_message(message.chat.id, "📭 Bazada hech qanday kino yo'q.")
+        else:
+            for m in movies:
+                markup = json.dumps({"inline_keyboard": [[{"text": "🗑 O'chirish", "callback_data": f"delm_{m['code']}", "style": "danger"}]]})
+                bot.send_message(
+                    message.chat.id,
+                    f"🎬 <b>{m['name']}</b>\n📌 Kod: <code>{m['code']}</code>\n🇺🇿 Til: {m['lang']} | 🎞 Sifat: {m['quality']}",
+                    parse_mode="HTML",
+                    reply_markup=markup
+                )
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('save_'))
 def save_movie_callback(call):
@@ -474,6 +481,19 @@ def unsave_movie_callback(call):
     code = call.data.split('_', 1)[1]
     database.remove_saved_movie(call.from_user.id, code)
     bot.answer_callback_query(call.id, "🗑 Kino saqlanganlardan o'chirildi!", show_alert=True)
+    try:
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+    except:
+        pass
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('delm_'))
+def delete_movie_callback(call):
+    if call.from_user.id not in ADMIN_IDS:
+        bot.answer_callback_query(call.id, "❌ Ruxsat yo'q!", show_alert=True)
+        return
+    code = call.data.split('_', 1)[1]
+    database.delete_movie(code)
+    bot.answer_callback_query(call.id, f"✅ '{code}' kodi bilan kino o'chirildi!", show_alert=True)
     try:
         bot.delete_message(call.message.chat.id, call.message.message_id)
     except:
